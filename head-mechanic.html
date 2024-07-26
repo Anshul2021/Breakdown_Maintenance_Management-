@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Head Mechanic Dashboard</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <!-- Google Fonts - Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- QR Code Scanner -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
+  <!-- Custom CSS -->
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    .navbar {
+      background-color: #007bff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand {
+      font-weight: 600;
+      color: #ffffff !important;
+    }
+
+    .logo {
+      max-height: 30px;
+      margin-right: 10px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin-top: 2rem;
+      background-color: #ffffff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    h1,
+    h2 {
+      color: #007bff;
+      margin-bottom: 2rem;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      border-color: #28a745;
+      transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+      background-color: #218838;
+      border-color: #218838;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    #reader video {
+      width: 100% !important;
+      border-radius: 8px;
+    }
+
+    #preloader,
+    #successMessage {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+    }
+
+    #successMessage i {
+      font-size: 3rem;
+      color: #28a745;
+    }
+
+    .form-label {
+      font-weight: 500;
+    }
+
+    .form-control {
+      border-radius: 8px;
+    }
+
+    .form-control:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    #message {
+      border-radius: 8px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+      .container {
+        padding: 1rem;
+      }
+
+      h1,
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .btn {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid d-flex justify-content-between align-items-center py-2 px-4">
+      <a class="navbar-brand" href="#">
+        <img src="logo.png" alt="Logo" class="logo">
+      </a>
+      <span id="user-greeting" class="text-light"></span>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container" id="main-container">
+    <h1><i class="fas fa-tools me-2"></i>Machine Maintenance</h1>
+    <form id="maintenanceForm" name="submit-to-google-sheet">
+      <!-- Machine Number Input -->
+      <div class="mb-3">
+        <label for="machineNo" class="form-label">Machine Number</label>
+        <div class="input-group">
+          <input type="text" class="form-control" id="machineNo" name="machineNo" required>
+          <button class="btn btn-primary" type="button" onclick="startQrScanner('machineNo')">
+            <i class="fas fa-qrcode me-2"></i>Scan QR
+          </button>
+        </div>
+      </div>
+
+      <!-- Breakdown Reason Dropdown -->
+      <div class="mb-3">
+        <label for="breakdownReason" class="form-label">Reason for Breakdown</label>
+        <select class="form-control" id="breakdownReason" name="breakdownReason" required>
+          <option value="">Select a reason</option>
+          <option value="Needle breakage">Needle breakage</option>
+          <option value="Skip stitches">Skip stitches</option>
+          <option value="Loose stitches">Loose stitches</option>
+          <option value="Thread breakage">Thread breakage</option>
+          <option value="Broken stitches">Broken stitches</option>
+          <option value="Needle hole">Needle hole</option>
+          <option value="Yarn breakage">Yarn breakage</option>
+          <option value="Machine jam">Machine jam</option>
+          <option value="Others">Others</option>
+        </select>
+      </div>
+
+      <!-- Other Reason Input (Hidden by default) -->
+      <div class="mb-3" id="otherReasonContainer" style="display: none;">
+        <label for="otherReason" class="form-label">Specify Other Reason</label>
+        <input type="text" class="form-control" id="otherReason" name="otherReason">
+      </div>
+
+      <!-- Replacement Machine Input -->
+      <div class="mb-3">
+        <label for="replacementMachine" class="form-label">Replacement Machine</label>
+        <div class="input-group">
+          <input type="text" class="form-control" id="replacementMachine" name="replacementMachine">
+          <button class="btn btn-primary" type="button" onclick="startQrScanner('replacementMachine')">
+            <i class="fas fa-qrcode me-2"></i>Scan QR
+          </button>
+        </div>
+      </div>
+
+      <input type="hidden" id="finalReason" name="finalReason">
+
+      <!-- Preloader -->
+      <div id="preloader" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Processing your request...</p>
+      </div>
+
+      <!-- Success Message -->
+      <div id="successMessage" style="display: none;">
+        <i class="fas fa-check-circle mb-2"></i>
+        <p>Action successfully reported!</p>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-success w-100" id="submitButton" data-submitted="false">
+        <i class="fas fa-paper-plane me-2"></i>Submit Report
+      </button>
+    </form>
+
+    <!-- Message Display -->
+    <div id="message" class="alert mt-3" role="alert" style="display: none;"></div>
+  </div>
+
+  <!-- QR Scanner Container -->
+  <div class="container" id="qr-container" style="display: none;">
+    <h2 class="text-center mb-4"><i class="fas fa-qrcode me-2"></i>Scan QR Code</h2>
+    <div id="reader"></div>
+    <button class="btn btn-danger mt-3 w-100" onclick="stopQrScanner()">
+      <i class="fas fa-times me-2"></i>Stop Scanning
+    </button>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    let qrScanner;
+    let currentScanTarget;
+
+    // Function to start QR scanner
+    function startQrScanner(target) {
+      currentScanTarget = target;
+      document.getElementById('main-container').style.display = 'none';
+      document.getElementById('qr-container').style.display = 'block';
+
+      qrScanner = new Html5Qrcode("reader");
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+      qrScanner.start({ facingMode: "environment" }, config, onScanSuccess, onScanError)
+        .catch(err => {
+          console.error("Error starting QR scanner:", err);
+          showMessage("Failed to start camera. Please ensure you've granted camera permissions.", "danger");
+          stopQrScanner();
+        });
+    }
+
+    // Function to stop QR scanner
+    function stopQrScanner() {
+      if (qrScanner && qrScanner.isScanning) {
+        qrScanner.stop().then(() => {
+          document.getElementById('main-container').style.display = 'block';
+          document.getElementById('qr-container').style.display = 'none';
+        }).catch(err => console.error("Error stopping QR scanner:", err));
+      } else {
+        document.getElementById('main-container').style.display = 'block';
+        document.getElementById('qr-container').style.display = 'none';
+      }
+    }
+
+    // Function to handle successful QR scan
+    function onScanSuccess(decodedText) {
+      document.getElementById(currentScanTarget).value = decodedText;
+      stopQrScanner();
+    }
+
+    // Function to handle QR scan error
+    function onScanError(err) {
+      console.error(err);
+    }
+
+    // Load user information on page load
+    window.onload = function () {
+      var userName = sessionStorage.getItem('userName');
+      var lineNo = sessionStorage.getItem('lineNo');
+
+      if (userName && lineNo) {
+        document.getElementById('user-greeting').textContent = `Welcome ${userName}, Line: ${lineNo}`;
+      }
+
+      // Add event listener for breakdown reason dropdown
+      document.getElementById('breakdownReason').addEventListener('change', function () {
+        if (this.value === 'Others') {
+          document.getElementById('otherReasonContainer').style.display = 'block';
+        } else {
+          document.getElementById('otherReasonContainer').style.display = 'none';
+        }
+      });
+    };
+
+    // Form submission event listener
+    document.getElementById('maintenanceForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const submitButton = document.getElementById('submitButton');
+      const preloader = document.getElementById('preloader');
+      const successMessage = document.getElementById('successMessage');
+
+      // Check if the form has already been submitted
+      if (submitButton.getAttribute('data-submitted') === 'true') {
+        showMessage('You have already submitted the form. Please reload the page to submit again.', 'warning');
+        return;
+      }
+
+      // Disable the button and mark as submitted
+      submitButton.setAttribute('data-submitted', 'true');
+      submitButton.disabled = true;
+
+      // Show the preloader
+      preloader.style.display = 'block';
+
+      const machineNo = document.getElementById('machineNo').value;
+      const breakdownReason = document.getElementById('breakdownReason').value;
+      const otherReason = document.getElementById('otherReason').value;
+      const finalReason = breakdownReason === 'Others' ? otherReason : breakdownReason;
+      document.getElementById('finalReason').value = finalReason;
+      const replacementMachine = document.getElementById('replacementMachine').value;
+
+      submitMaintenanceForm(machineNo, finalReason, replacementMachine);
+    });
+
+    function submitMaintenanceForm(machineNo, finalReason, replacementMachine) {
+  const submitButton = document.getElementById('submitButton');
+  const preloader = document.getElementById('preloader');
+  const successMessage = document.getElementById('successMessage');
+  const userName = sessionStorage.getItem('userName');
+  const lineNo = sessionStorage.getItem('lineNo');
+
+  const currentDate = new Date();
+  const dateTime = `${currentDate.getDate().toString().padStart(2, '0')}/${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/${currentDate.getFullYear()} ${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}:${currentDate.getSeconds().toString().padStart(2, '0')}`;
+
+  const status = 'Repaired';
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbxKSCeLCmFwy4XHfFbaLTaHApQ_L-m4cBRrYvWDsvTgqtjoqjZur9GM9UBiWqyez5E/exec';
+
+  fetch(`${scriptURL}?action=getCounts&machineNo=${encodeURIComponent(machineNo)}`)
+    .then(response => response.json())
+    .then(data => {
+      const breakdownCount = data.breakdownCount || 0;
+      const repairedCount = data.repairedCount || 0;
+
+      if (breakdownCount > repairedCount) {
+        const repairedUrl = `${scriptURL}?action=addRepaired&dateTime=${encodeURIComponent(dateTime)}&machineNo=${encodeURIComponent(machineNo)}&status=${encodeURIComponent(status)}&userName=${encodeURIComponent(userName)}&lineNo=${encodeURIComponent(lineNo)}&reason=${encodeURIComponent(finalReason)}&replacementMachine=${encodeURIComponent(replacementMachine)}`;
+
+        return fetch(repairedUrl, { method: 'GET' })
+          .then(response => response.json())
+          .then(result => {
+            if (result.success) {
+              handleSuccessfulSubmission(preloader, successMessage);
+            } else {
+              throw new Error(result.message || 'Error adding repaired record');
+            }
+          });
+      } else {
+        throw new Error('No pending breakdown for this machine');
+      }
+    })
+    .catch(error => {
+      handleSubmissionError(submitButton, preloader, error);
+    });
+}
+    // Function to handle successful submission
+    function handleSuccessfulSubmission(preloader, successMessage) {
+      preloader.style.display = 'none';
+      successMessage.style.display = 'block';
+
+      // Reset form fields
+      document.getElementById('maintenanceForm').reset();
+
+      // Re-enable submit button after 3 seconds
+      setTimeout(() => {
+        document.getElementById('submitButton').setAttribute('data-submitted', 'false');
+        document.getElementById('submitButton').disabled = false;
+        successMessage.style.display = 'none';
+      }, 3000);
+    }
+
+    // Function to handle submission error (continued)
+    function handleSubmissionError(submitButton, preloader, error) {
+      submitButton.setAttribute('data-submitted', 'false');
+      submitButton.disabled = false;
+      preloader.style.display = 'none';
+      showMessage(error.message || 'Error submitting report. Please try again.', 'danger');
+      console.error('Error:', error);
+    }
+
+    // Function to handle case when no breakdown is recorded
+    function handleNoBreakdownRecorded(submitButton, preloader) {
+      submitButton.setAttribute('data-submitted', 'false');
+      submitButton.disabled = false;
+      preloader.style.display = 'none';
+      showMessage('There is no breakdown recorded for this machine.', 'warning');
+    }
+
+    // Function to handle error in fetching counts
+    function handleFetchCountsError(submitButton, preloader, error) {
+      submitButton.setAttribute('data-submitted', 'false');
+      submitButton.disabled = false;
+      preloader.style.display = 'none';
+      showMessage('Error fetching breakdown and repaired counts. Please try again.', 'danger');
+      console.error('Error:', error);
+    }
+
+    // Function to show messages
+    function showMessage(message, type) {
+      const messageElement = document.getElementById('message');
+      messageElement.textContent = message;
+      messageElement.className = `alert alert-${type} mt-3`;
+      messageElement.style.display = 'block';
+
+      // Hide message after 5 seconds
+      setTimeout(() => {
+        messageElement.style.display = 'none';
+      }, 5000);
+    }
+
+    // Add smooth scrolling for better mobile experience
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // Add animation to success message
+    function animateSuccess() {
+      const successIcon = document.querySelector('#successMessage i');
+      successIcon.classList.add('animate__animated', 'animate__bounceIn');
+    }
+  </script>
+
+  <!-- Bootstrap JS and Popper.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>

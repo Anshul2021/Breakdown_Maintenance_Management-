@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operational Monitoring System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            padding-top: 56px;
+        }
+
+        .navbar {
+            background: #000000 !important;
+        }
+
+        .card {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 15px;
+        }
+
+        .card-title {
+            font-weight: 600;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .logo {
+            max-width: 20%;
+            height: auto;
+        }
+
+        .status-text {
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-light" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-center">
+            <img src="dashboard-logo.png" alt="Aquarelle Logo" class="logo">
+        </div>
+
+        <h3 class="text-center mt-5">Operational Monitoring System</h3>
+
+        <div class="row mt-4">
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body py-5">
+                        <h5 class="card-title">No. of Machines Repaired</h5>
+                        <h1 class="display-4 status-text" id="repairedStatus">-</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card bg-danger text-white h-100">
+                    <div class="card-body py-5">
+                        <h5 class="card-title">No. of Machine Breakdown</h5>
+                        <h1 class="display-4 status-text" id="breakdownStatus">-</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card bg-warning h-100">
+                    <div class="card-body py-5">
+                        <h5 class="card-title text-dark">Machine Status</h5>
+                        <div class="input-group mb-3">
+                            <input type="text" id="machineNo" class="form-control" placeholder="Enter Machine No.">
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="checkMachineStatus()">Know Status</button>
+                        <h2 class="mt-3 text-center" id="machineStatus">-</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Select Date</h5>
+                        <div class="input-group">
+                            <input type="date" id="dateFilter" class="form-control">
+                            <button class="btn btn-primary" id="filterButton">Filter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Select Line</h5>
+                        <div class="input-group">
+                            <select id="lineFilter" class="form-select">
+                                <option value="">All Lines</option>
+                                <option value="1">Line 1</option>
+                                <option value="2">Line 2</option>
+                                <option value="3">Line 3</option>
+                                <option value="4">Line 4</option>
+                                <option value="5">Line 5</option>
+                                <option value="6">Line 6</option>
+                                <option value="7">Line 7</option>
+                                <option value="8">Line 8</option>
+                                <option value="9">Line 9</option>
+                                <option value="10">Line 10</option>
+                            </select>
+                            <button class="btn btn-primary" id="lineFilterButton">Filter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 mb-3">
+                <div class="card d-none">
+                    <div class="card-body">
+                        <h5 class="card-title">Breakdown Sheet Data</h5>
+                        <div class="table-responsive">
+                            <table id="breakdownTable" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Date</th>
+                                        <th>Machine No</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 mb-3">
+                <div class="card d-none">
+                    <div class="card-body">
+                        <h5 class="card-title">Repaired Sheet Data</h5>
+                        <div class="table-responsive">
+                            <table id="repairedTable" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Date</th>
+                                        <th>Machine No</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">No. of Breakdown per machine</h5>
+                        <div id="breakdownChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">No. of Repairs per machine</h5>
+                        <div id="repairedChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Reasons for breakdown</h5>
+                    <div id="reasonChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+ // Constants for Google Sheets
+const SHEET_ID = '1Qt7k4PdJS4knboB_Vy2m9URi3etYFWZ7lArWXEakU9Q';
+const BREAKDOWN_SHEET = 'BreakdownSheet';
+const REPAIRED_SHEET = 'RepairedSheet';
+let breakdownChart;
+let repairedChart;
+let repairedData;
+let breakdownData;
+
+// Function to fetch CSV data from Google Sheets
+function fetchCSV(sheetName) {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${sheetName}`;
+    return fetch(url)
+        .then(response => response.text())
+        .then(data => {
+            // Split the CSV into rows, then split each row into cells
+            return data.split('\n').map(row =>
+                row.split(',').map(cell => cell.replace(/^"|"$/g, '').trim())
+            );
+        });
+}
+
+// Function to process data
+function processData(data, filterDate = null, filterLine = null) {
+    console.debug("Processing data with filter date:", filterDate, "and filter line:", filterLine);
+    const counts = {};
+    const tableData = [];
+    // Start from index 1 to skip the header row
+    for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        if (row.length < 4) continue; // Skip rows with insufficient data
+
+        const dateTimeStr = row[0];
+        const [datePart, timePart] = dateTimeStr.split(' ');
+        const machine = row[1];
+        const reason = row[2];
+        const line = row[3];
+
+        if ((!filterDate || datePart === filterDate) && (!filterLine || line === filterLine)) {
+            counts[machine] = (counts[machine] || 0) + 1;
+            tableData.push([dateTimeStr, datePart, timePart, machine, reason, line]);
+        }
+    }
+    console.debug("Processed counts:", counts);
+    return {
+        counts: Object.entries(counts).sort((a, b) => b[1] - a[1]),
+        tableData: tableData
+    };
+}
+
+// New function to process reason data
+function processReasonData(data, filterDate = null, filterLine = null) {
+    const reasons = {};
+    // Start from index 1 to skip the header row
+    for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        if (row.length < 6) continue; // Skip rows with insufficient data
+
+        const dateTimeStr = row[0];
+        const [datePart, timePart] = dateTimeStr.split(' ');
+        const reason = row[5]; // Reason is in the 6th column (index 5)
+        const line = row[3];
+
+        if ((!filterDate || datePart === filterDate) && (!filterLine || line === filterLine)) {
+            reasons[reason] = (reasons[reason] || 0) + 1;
+        }
+    }
+    return Object.entries(reasons).sort((a, b) => b[1] - a[1]);
+}
+
+// Function to populate the table
+function populateTable(data, tableId) {
+    const tableBody = document.querySelector(`#${tableId} tbody`);
+    tableBody.innerHTML = '';
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        row.forEach(cell => {
+            const td = document.createElement('td');
+            td.textContent = cell;
+            tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+    });
+}
+
+// Function to parse date string
+function parseDate(dateString) {
+    const parts = dateString.split(/[/ :]/);
+    if (parts.length >= 3) {
+        // Assuming the format is DD/MM/YYYY or MM/DD/YYYY
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+        const year = parseInt(parts[2], 10);
+        return new Date(year, month, day);
+    }
+    return null;
+}
+
+// Function to format date as dd/mm/yyyy
+function formatDate(date) {
+    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+}
+
+// Function to update status
+function updateStatus(data, elementId, filterDate = null, filterLine = null) {
+    let count = data.slice(1).filter(row => {
+        const rowDate = parseDate(row[0]);
+        const rowLine = row[3]; // Assuming line number is in the fourth column
+        return (!filterDate || (rowDate && formatDate(rowDate) === filterDate)) &&
+            (!filterLine || rowLine === filterLine);
+    }).length;
+    document.getElementById(elementId).textContent = count;
+}
+
+// Function to create chart
+function createChart(data, chartElementId, title, colors, filterDate = null, filterLine = null) {
+    console.debug(`Creating ${title} chart with filter date:`, filterDate, "and filter line:", filterLine);
+    const processedData = processData(data, filterDate, filterLine);
+    const sortedData = processedData.counts;
+    const machines = sortedData.map(item => item[0]);
+    const counts = sortedData.map(item => item[1]);
+
+    const options = {
+        series: [{
+            name: title,
+            data: counts
+        }],
+        chart: {
+            height: 450,
+            type: 'bar',
+            toolbar: {
+                show: true,
+                tools: {
+                    download: true,
+                    selection: true,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
+                    reset: true
+                },
+                export: {
+                    csv: {
+                        filename: `${title} Frequency`,
+                        columnDelimiter: ',',
+                        headerCategory: 'Machine Number',
+                        headerValue: `Number of ${title}`,
+                    },
+                    svg: {
+                        filename: `${title} Frequency`,
+                    },
+                    png: {
+                        filename: `${title} Frequency`,
+                    }
+                },
+            }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 0,
+                columnWidth: '80%',
+                distributed: true,
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        title: {
+            text: `${title} Frequency`,
+            align: 'center',
+            style: {
+                fontSize: '18px',
+                fontWeight: 'bold'
+            }
+        },
+        colors: colors,
+        xaxis: {
+            categories: machines,
+            labels: {
+                style: {
+                    fontSize: '12px'
+                }
+            },
+            title: {
+                text: 'Machine Number'
+            }
+        },
+        yaxis: {
+            title: {
+                text: `Number of ${title}`
+            },
+            labels: {
+                formatter: function (val) {
+                    return Math.floor(val);
+                }
+            }
+        },
+        grid: {
+            borderColor: '#e0e0e0',
+            strokeDashArray: 5,
+        }
+    };
+
+    const chart = new ApexCharts(document.querySelector(`#${chartElementId}`), options);
+
+    chart.render();
+    return chart;
+}
+
+// Function to update chart
+function updateChart(chart, data, title, filterDate = null, filterLine = null) {
+    const processedData = processData(data, filterDate, filterLine);
+    const sortedData = processedData.counts;
+    const machines = sortedData.map(item => item[0]);
+    const counts = sortedData.map(item => item[1]);
+
+    chart.updateOptions({
+        series: [{
+            name: title,
+            data: counts
+        }],
+        xaxis: {
+            categories: machines
+        }
+    });
+}
+
+// Function to create reason chart
+function createReasonChart(data, chartElementId, title, colors, filterDate = null, filterLine = null) {
+    console.debug(`Creating ${title} chart with filter date:`, filterDate, "and filter line:", filterLine);
+    const processedData = processReasonData(data, filterDate, filterLine);
+    const reasons = processedData.map(item => item[0]);
+    const counts = processedData.map(item => item[1]);
+
+    const options = {
+        series: [{
+            name: title,
+            data: counts
+        }],
+        chart: {
+            height: 450,
+            type: 'bar',
+            toolbar: {
+                show: true,
+                tools: {
+                    download: true,
+                    selection: true,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
+                    reset: true
+                },
+                export: {
+                    csv: {
+                        filename: `${title} Frequency`,
+                        columnDelimiter: ',',
+                        headerCategory: 'Reason',
+                        headerValue: `Number of ${title}`,
+                    },
+                    svg: {
+                        filename: `${title} Frequency`,
+                    },
+                    png: {
+                        filename: `${title} Frequency`,
+                    }
+                },
+            }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 0,
+                columnWidth: '80%',
+                distributed: true,
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        title: {
+            text: `${title} Frequency`,
+            align: 'center',
+            style: {
+                fontSize: '18px',
+                fontWeight: 'bold'
+            }
+        },
+        colors: colors,
+        xaxis: {
+            categories: reasons,
+            labels: {
+                style: {
+                    fontSize: '12px'
+                },
+           
+            },
+            title: {
+                text: 'Reason'
+            }
+        },
+        yaxis: {
+            title: {
+                text: `Number of ${title}`
+            },
+            labels: {
+                formatter: function (val) {
+                    return Math.floor(val);
+                }
+            }
+        },
+        grid: {
+            borderColor: '#e0e0e0',
+            strokeDashArray: 5,
+        }
+    };
+
+    const chart = new ApexCharts(document.querySelector(`#${chartElementId}`), options);
+    chart.render();
+    return chart;
+}
+
+// Function to update reason chart
+function updateReasonChart(chart, data, title, filterDate = null, filterLine = null) {
+    const processedData = processReasonData(data, filterDate, filterLine);
+    const reasons = processedData.map(item => item[0]);
+    const counts = processedData.map(item => item[1]);
+
+    chart.updateOptions({
+        series: [{
+            name: title,
+            data: counts
+        }],
+        xaxis: {
+            categories: reasons
+        }
+    });
+}
+
+// Function to check machine status
+function checkMachineStatus() {
+    const machineNo = document.getElementById('machineNo').value.trim();
+    const statusElement = document.getElementById('machineStatus');
+
+    console.log("Checking status for machine:", machineNo);
+
+    if (!machineNo) {
+        alert("Please enter a machine number");
+        return;
+    }
+
+    if (!repairedData || !breakdownData) {
+        statusElement.textContent = "Data not loaded yet";
+        statusElement.className = "mt-3 text-center text-warning";
+        return;
+    }
+
+    let repairedEntry = findLatestEntry(repairedData, machineNo);
+    let breakdownEntry = findLatestEntry(breakdownData, machineNo);
+
+    console.log("Latest repaired entry:", repairedEntry);
+    console.log("Latest breakdown entry:", breakdownEntry);
+
+    if (!repairedEntry && !breakdownEntry) {
+        statusElement.textContent = "No Data";
+        statusElement.className = "mt-3 text-center text-secondary";
+        return;
+    }
+
+    if (!repairedEntry) {
+        statusElement.textContent = "Breakdown";
+        statusElement.className = "mt-3 text-center text-danger";
+        return;
+    }
+
+    if (!breakdownEntry) {
+        statusElement.textContent = "Running";
+        statusElement.className = "mt-3 text-center text-success";
+        return;
+    }
+
+    let repairedDateTime = new Date(repairedEntry[1] + ' ' + repairedEntry[2]);
+    let breakdownDateTime = new Date(breakdownEntry[1] + ' ' + breakdownEntry[2]);
+
+    console.log("Repaired date and time:", repairedDateTime);
+    console.log("Breakdown date and time:", breakdownDateTime);
+
+    if (repairedDateTime > breakdownDateTime) {
+        statusElement.textContent = "Running";
+        statusElement.className = "mt-3 text-center text-success";
+    } else {
+        statusElement.textContent = "Breakdown";
+        statusElement.className = "mt-3 text-center text-danger";
+    }
+}
+
+function findLatestEntry(data, machineNo) {
+    let latestEntry = null;
+    let latestDateTime = null;
+
+    data.slice(1).forEach(row => {
+        if (row[3].trim() === machineNo || row[3].trim() === "DNLS " + machineNo) {
+            let currentDateTime = new Date(row[1] + ' ' + row[2]);
+            if (!latestDateTime || currentDateTime > latestDateTime) {
+                latestDateTime = currentDateTime;
+                latestEntry = row;
+            }
+        }
+    });
+
+    return latestEntry;
+}
+
+// Event listener for DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function () {
+    let dataLoaded = {
+        repaired: false,
+        breakdown: false
+    };
+
+    let reasonChart;
+
+    // Fetch and process breakdown data
+    fetchCSV(BREAKDOWN_SHEET)
+        .then(data => {
+            breakdownData = data;  // Keep all rows, including headers
+            console.debug("Fetched breakdown data:", breakdownData);
+            breakdownChart = createChart(breakdownData, "breakdownChart", "Breakdowns", ['#FF0000', '#A9A9A9', '#FFC0CB']);
+            updateStatus(breakdownData, 'breakdownStatus');
+            populateTable(processData(breakdownData).tableData, 'breakdownTable');
+            dataLoaded.breakdown = true;
+            enableStatusCheck();
+        })
+        .catch(error => {
+            console.error('Error fetching breakdown data:', error);
+            document.getElementById('breakdownChart').textContent = 'Error fetching breakdown data: ' + error.message;
+        });
+
+   // Fetch and process repaired data
+   fetchCSV(REPAIRED_SHEET)
+        .then(data => {
+            repairedData = data;  // Keep all rows, including headers
+            console.debug("Fetched repaired data:", repairedData);
+            repairedChart = createChart(repairedData, "repairedChart", "Repairs", ['#00FF00', '#A9A9A9', '#90EE90']);
+            updateStatus(repairedData, 'repairedStatus');
+            populateTable(processData(repairedData).tableData, 'repairedTable');
+            
+            // Create the new reason chart
+            reasonChart = createReasonChart(repairedData, "reasonChart", "Breakdown Reason", ['#FFA500', '#FFD700', '#FF6347', '#20B2AA', '#9370DB']);
+            
+            dataLoaded.repaired = true;
+            enableStatusCheck();
+        })
+        .catch(error => {
+            console.error('Error fetching repaired data:', error);
+            document.getElementById('repairedChart').textContent = 'Error fetching repaired data: ' + error.message;
+            document.getElementById('reasonChart').textContent = 'Error fetching repaired data: ' + error.message;
+        });
+
+    function enableStatusCheck() {
+        if (dataLoaded.repaired && dataLoaded.breakdown) {
+            document.querySelector('button.btn-primary').disabled = false;
+            document.getElementById('filterButton').disabled = false;
+            document.getElementById('lineFilterButton').disabled = false;
+        }
+    }
+
+    // Add event listener for the filter button
+    document.getElementById('filterButton').addEventListener('click', applyFilters);
+    document.getElementById('lineFilterButton').addEventListener('click', applyFilters);
+
+    function applyFilters() {
+        const filterDate = document.getElementById('dateFilter').value;
+        const filterLine = document.getElementById('lineFilter').value;
+        let formattedFilterDate = null;
+
+        if (filterDate) {
+            formattedFilterDate = formatDate(new Date(filterDate));
+        }
+
+        console.debug("Filters applied. Date:", formattedFilterDate, "Line:", filterLine);
+
+        updateChart(breakdownChart, breakdownData, "Breakdowns", formattedFilterDate, filterLine);
+        updateStatus(breakdownData, 'breakdownStatus', formattedFilterDate, filterLine);
+        populateTable(processData(breakdownData, formattedFilterDate, filterLine).tableData, 'breakdownTable');
+
+        updateChart(repairedChart, repairedData, "Repairs", formattedFilterDate, filterLine);
+        updateStatus(repairedData, 'repairedStatus', formattedFilterDate, filterLine);
+        populateTable(processData(repairedData, formattedFilterDate, filterLine).tableData, 'repairedTable');
+
+        // Update the reason chart
+        updateReasonChart(reasonChart, repairedData, "Repair Reasons", formattedFilterDate, filterLine);
+    }
+
+    // Add an event listener for the "Know Status" button
+    document.querySelector('button.btn-primary').addEventListener('click', checkMachineStatus);
+});
+    </script>
+</body>
+
+</html>
